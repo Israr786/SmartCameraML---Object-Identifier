@@ -11,7 +11,9 @@ import AVKit
 import Vision
 
 class ViewController: UIViewController,AVCaptureVideoDataOutputSampleBufferDelegate {
-
+   
+    @IBOutlet weak var objectDisplayLabel: UILabel!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -37,6 +39,7 @@ class ViewController: UIViewController,AVCaptureVideoDataOutputSampleBufferDeleg
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
        // print("Camera was able to capture a frame",Date())
         
+      
         guard  let pixelBUffer:CVPixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {return }
         
         guard let model = try? VNCoreMLModel(for: Resnet50().model) else {return}
@@ -47,11 +50,18 @@ class ViewController: UIViewController,AVCaptureVideoDataOutputSampleBufferDeleg
             guard let firstObservation = results.first else {return}
             
             print(firstObservation.identifier,firstObservation.confidence)
+          //  self.objectDisplayLabel.text = firstObservation.identifier
+            
+            DispatchQueue.main.async {
+                 self.objectDisplayLabel.text = "\(firstObservation.identifier) \(firstObservation.confidence)"
+            }
+           
+            
             
         }
         
         try? VNImageRequestHandler(cvPixelBuffer:pixelBUffer , options:[:]).perform([request])
-
+        
     }
 
     override func didReceiveMemoryWarning() {
